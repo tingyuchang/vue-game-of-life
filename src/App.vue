@@ -1,28 +1,44 @@
 <template>
-  <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+  <div id="container">
+        <CellList :cells="cells" @cellSelect="onCellSelect"/>
   </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+import axios from 'axios';
+import CellList from './components/CellList'
 
 export default {
   name: 'App',
   components: {
-    HelloWorld
-  }
+        CellList: CellList,
+    },
+  data () {
+        return { 
+            cells: [],
+            selectedCell: null,
+        };
+    },
+  methods: {
+    onOpen() {
+      axios.get('http://localhost:8081/', {
+            }).then(response => {
+                this.cells = response.data;
+            }).catch(reason => {
+                console.log(reason);
+            });
+    },
+    onCellSelect(cell) {
+            console.log(cell.id);
+            this.selectedCell = cell;
+        }
+  },
+  mounted(){
+    this.onOpen()
+ },
+ 
 }
 </script>
 
-<style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
-}
+<style scoped>
 </style>
