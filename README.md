@@ -1,4 +1,4 @@
-# hello-world
+# Game-of-life
 
 ## Project setup
 ```

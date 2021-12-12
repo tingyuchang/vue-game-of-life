@@ -1,5 +1,5 @@
 {
-  "name": "hello-world",
+  "name": "Game-of-life",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -11,7 +11,8 @@
     "axios": "^0.24.0",
     "core-js": "^3.6.5",
     "cors": "^2.8.5",
-    "vue": "^2.6.11"
+    "vue": "^2.6.11",
+    "vue-grid-layout": "^2.3.12"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "~4.5.0",
