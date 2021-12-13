@@ -19,7 +19,7 @@
                        :w="1"
                        :h="1"
                        :i="cell.id"
-                       v-bind:class="{ live: cell.is_live }"
+                       v-bind:class="{ live: cell.is_live}"
             >
             <span class="span" @click="onCellSelect(cell)"></span>
             </grid-item>
@@ -53,7 +53,8 @@ export default {
             button: {
               text: 'Start',
               isStart: false
-            }
+            },
+            ws: null,
         };
     },
   methods: {
@@ -130,16 +131,60 @@ export default {
         }).catch(reason => {
           console.log(reason);
         });
-    }
+    },
+     initWebSocket(){ 
+        this.ws = new WebSocket("ws://127.0.0.1:8081/ws")
+        this.ws.onmessage = this.websocketOnmessage;
+        this.ws.onopen = this.websocketOnopen;
+        this.ws.onerror = this.websocketOnerror;
+        this.ws.onclose = this.websocketClose;
+      },
+      websocketOnopen(){ 
+        // say hi
+      },
+      websocketOnerror(){
+        this.initWebSocket();
+      },
+      websocketOnmessage(e){ 
+        let data = JSON.parse(e.data);
+        this.cells = data.cells;
+        if (data.is_start ) {
+          this.button.isStart = true
+          this.button.text = "Stop"
+        } else {
+          this.button.isStart = false
+          this.button.text = "Start"
+        }
+        console.log(this.button)
+      },
+      websocketSend(Data){
+        this.ws.send(Data);
+      },
+      websocketClose(e){ 
+        console.log('webcosket closed',e);
+      },
   },
   mounted(){
+    this.onOpen();
     this.$nextTick(function () {
             window.setInterval(() => {
-                this.onOpen();
-            },1000);
+              console.log('heartbeat')
+                this.websocketSend('ping')
+            },8000); // send ping to ws
         })
- },
- 
+  },
+  created() {
+      this.initWebSocket();
+  },
+  destroyed() {
+      this.ws.close();
+  },
+  computed: {
+    colourChange(color){
+      console.log(color)
+      return String.format('backgroundColor: {0};', color);
+    }
+  }
 }
 </script>
 
@@ -182,6 +227,7 @@ export default {
     width: 80px;
     height: 30px;
     margin-right: 5px;
+    margin-bottom: 5px;
   }
  
 </style>
