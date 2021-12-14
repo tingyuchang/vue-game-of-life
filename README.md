@@ -27,3 +27,5 @@ heroku container:release web
 
 ### Demo
 [demo site](https://afternoon-fjord-92266.herokuapp.com/)
+
+![Imgur](https://imgur.com/SwC0P2u.gif)
