@@ -14,11 +14,16 @@ npm run serve
 ```
 npm run build
 ```
+### How to Deploy to Heroku
 
-### Lints and fixes files
+1. change VUE_APP_API_URL & VUE_APP_WS_URL in .env.
+2. this site is recommend using docker to deploy. 
+
 ```
-npm run lint
+heroku create
+heroku container:push web
+heroku container:release web
 ```
 
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+### Demo
+[demo site](https://afternoon-fjord-92266.herokuapp.com/)

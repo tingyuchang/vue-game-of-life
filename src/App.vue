@@ -30,7 +30,11 @@
           <button class="btn" @click="onClickStart()"> {{button.text}} </button>
           <button class="btn" @click="onClickNext()"> Next </button>
           <button class="btn" @click="onClickReset()"> Reset </button>
+          <button class="btn" value="1" v-on:click="onClickPattern($event)"> Glider </button>
+          <button class="btn" value="2" v-on:click="onClickPattern($event)"> Beacon </button>
+          <button class="btn" value="3" v-on:click="onClickPattern($event)"> Boat </button>
         </div>
+        
   </div>
   
 </template>
@@ -38,6 +42,11 @@
 <script>
 import axios from 'axios';
 import VueGridLayout from 'vue-grid-layout';
+
+// let backend_url = 'https://hidden-beach-63150.herokuapp.com'
+// let ws_url = 'wss://hidden-beach-63150.herokuapp.com/ws'
+let backend_url = 'http://localhost:8080'
+let ws_url = 'ws://localhost:8080'
 
 export default {
   name: 'App',
@@ -56,13 +65,14 @@ export default {
             },
             ws: null,
             // default color is black
-            clientColor: '#000000'
+            clientColor: '#000000',
+            selectedCell: null
         };
     },
   methods: {
     onOpen() {
       // api for get cells
-      axios.get('http://localhost:8081/', {
+      axios.get(backend_url, {
             }).then(response => {
                 this.cells = response.data.cells;
                 if (response.data.is_start ) {
@@ -78,15 +88,17 @@ export default {
     },
     onCellSelect(cell) {
       // api for post reverse action
-      axios.post('http://localhost:8081/reverse', {
+      // update cell status immediate
+      this.selectedCell = cell;
+      cell.is_live = !cell.is_live;
+      cell.color = this.clientColor;
+      axios.post(backend_url+'/reverse', {
         id: cell.id,
         color: this.clientColor
       }, {
             headers: {"Content-Type": "application/x-www-form-urlencoded"}
-          }).then(response => {
-              if (response.data.success) {
-                  cell.is_live = !cell.is_live
-              }
+          }).then(() => {
+              // do nothing
           }).catch(reason => {
               console.log(reason);
           });
@@ -94,7 +106,7 @@ export default {
     onClickStart() {
       // api for post stop
       if (this.button.isStart) {
-        axios.post('http://localhost:8081/stop', {}, {
+        axios.post(backend_url+'/stop', {}, {
           headers: {"Content-Type": "application/x-www-form-urlencoded"}
         }).then(response => {
           if (response.data.success) {
@@ -107,7 +119,7 @@ export default {
         });
       } else {
         // api for post start
-        axios.post('http://localhost:8081/start', {}, {
+        axios.post(backend_url+'/start', {}, {
           headers: {"Content-Type": "application/x-www-form-urlencoded"}
         }).then(response => {
           if (response.data.success) {
@@ -123,7 +135,7 @@ export default {
     },
     onClickNext() {
       // api for post next
-        axios.post('http://localhost:8081/next', {}, {
+        axios.post(backend_url+'/next', {}, {
           headers: {"Content-Type": "application/x-www-form-urlencoded"}
         }).then(() => {
           // do nothing
@@ -133,7 +145,7 @@ export default {
     },
     onClickReset() {
       // api for post reset
-        axios.post('http://localhost:8081/reset', {}, {
+        axios.post(backend_url+'/reset', {}, {
           headers: {"Content-Type": "application/x-www-form-urlencoded"}
         }).then(() => {
           // do nothing
@@ -141,9 +153,21 @@ export default {
           console.log(reason);
         });
     },
+    onClickPattern(e) {
+      // api for change pattern
+        axios.post(backend_url+'/pattern', {
+            pattern: parseInt(e.target.value, 10)
+        }, {
+          headers: {"Content-Type": "application/x-www-form-urlencoded"}
+        }).then(response => {
+          this.cells = response.data.cells
+        }).catch(reason => {
+          console.log(reason);
+        });
+    },
     getColor() {
       // api for get color
-        axios.get('http://localhost:8081/color', {}, {
+        axios.get(backend_url+'/color', {}, {
           headers: {"Content-Type": "application/x-www-form-urlencoded"}
         }).then(response => {
           if (response.data.color) {
@@ -154,7 +178,7 @@ export default {
         });
     },
     initWebSocket(){ 
-        this.ws = new WebSocket("ws://127.0.0.1:8081/ws")
+        this.ws = new WebSocket(ws_url+'/ws')
         this.ws.onmessage = this.websocketOnmessage;
         this.ws.onopen = this.websocketOnopen;
         this.ws.onerror = this.websocketOnerror;
@@ -169,7 +193,7 @@ export default {
       websocketOnmessage(e){ 
         let data = JSON.parse(e.data);
         this.cells = data.cells;
-        if (data.is_start ) {
+        if (data.is_start) {
           this.button.isStart = true
           this.button.text = "Stop"
         } else {
@@ -195,7 +219,11 @@ export default {
         })
   },
   created() {
-      this.initWebSocket();
+    if (process.env.NODE_ENV == 'production') {
+      backend_url = process.env.VUE_APP_API_URL;
+      ws_url = process.env.VUE_APP_WS_URL;
+    }
+    this.initWebSocket();
   },
   destroyed() {
       this.ws.close();
@@ -228,6 +256,15 @@ export default {
   left: 0;
   height: 100%;
   width: 100%;
+}
+
+.container {
+  position: absolute;
+  top: 30px;
+  bottom: 30px;
+  left: 20%;
+  height: 70%;
+  width: 50%;
 }
 
 .controller {
