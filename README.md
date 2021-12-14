@@ -1,5 +1,8 @@
 # Game-of-life
 
+this is frontend site written by Vue.js, for detail introduction,
+please see [go-game-of-life](https://github.com/tingyuchang/go-game-of-life)
+
 ## Project setup
 ```
 npm install
@@ -10,10 +13,11 @@ npm install
 npm run serve
 ```
 
-### Compiles and minifies for production
+or 
 ```
-npm run build
+docker-compose up -d
 ```
+
 ### How to Deploy to Heroku
 
 1. change VUE_APP_API_URL & VUE_APP_WS_URL in .env.

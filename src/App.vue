@@ -43,8 +43,6 @@
 import axios from 'axios';
 import VueGridLayout from 'vue-grid-layout';
 
-// let backend_url = 'https://hidden-beach-63150.herokuapp.com'
-// let ws_url = 'wss://hidden-beach-63150.herokuapp.com/ws'
 let backend_url = 'http://localhost:8080'
 let ws_url = 'ws://localhost:8080'
 
@@ -228,12 +226,6 @@ export default {
   destroyed() {
       this.ws.close();
   },
-  computed: {
-    colourChange(color){
-      console.log(color)
-      return String.format('backgroundColor: {0};', color);
-    }
-  }
 }
 </script>
 
